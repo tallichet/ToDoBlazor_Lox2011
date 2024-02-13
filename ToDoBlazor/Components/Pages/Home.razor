@@ -1,0 +1,69 @@
+﻿@page "/"
+@using Microsoft.EntityFrameworkCore
+@using ToDoBlazor.Data
+@inject ApplicationDbContext db
+
+
+<PageTitle>Todo</PageTitle>
+
+<h2>Liste des chose à faire!</h2>
+
+@if (items == null)
+{
+    <div>Chargement en cours</div>
+}
+else
+{   
+    <ul>
+        @foreach(var item in items)
+        {
+            <li><InputCheckbox @bind-Value="@item.Done" /> @item.DisplayLabel <a href="#" @onclick="@(() => Remove(item))">x</a></li>        
+        }
+    </ul>
+
+    <input type="text" @bind-value="@newValue" />
+    <button class="btn btn-primary" @onclick="DecrementCount">Ajouter</button>
+}
+@code {
+    List<ToDoItem> items { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        items = await db.ToDoItems.ToListAsync();
+    }
+
+    private string newValue = "";
+
+    private async void DecrementCount()
+    {
+        var newItem = new ToDoItem { DisplayLabel = newValue };
+        db.ToDoItems.Add(newItem);
+        db.SaveChanges();
+
+        items.Add(newItem);
+        newValue = "";
+    }
+
+    private void Remove(ToDoItem item)
+    {
+        items.Remove(item);
+        db.ToDoItems.Remove(item);
+        db.SaveChanges();
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
